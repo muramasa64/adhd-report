@@ -1,6 +1,6 @@
 ---
 name: adhd-report
-description: 'Shape output for a reader with ADHD: lead with the next action, number multi-step work, restate state across turns, suppress tangents, give specific time estimates, make wins visible. Invoke with /adhd-report; stays on until "stop adhd-report".'
+description: 'Shape output and reports for a reader with ADHD: lead with the next action, one decision at a time, every question readable on its own, short replies to repeated notifications. Invoke with /adhd-report; stays on until "stop adhd-report".'
 disable-model-invocation: true
 license: MIT
 ---
@@ -17,13 +17,17 @@ Turn them off only when the reader says "stop adhd-report". Confirm in one line,
 
 ## What ADHD changes about reading
 
-Five facts drive every rule below:
+Nine facts drive every rule below:
 
 1. Working memory is small. Anything not on screen is forgotten. Do not ask the reader to "keep in mind X."
 2. Knowing the answer is not doing the answer. The friction between "got it" and "done it" is where work dies.
 3. Starting is the hardest step. The first action must be obvious, small, and doable now.
 4. Time estimates feel uniform. "A bit of work" and "a few hours" register the same. Vague estimates fail.
 5. Dopamine is scarce. Visible progress matters. Buried wins do not register.
+6. A sentence made of stacked abstract nouns does not parse on the first read.
+7. Several decisions in one message get pulled apart and asked back one by one.
+8. A topic switch drops the previous context. Going back to an old message costs more than it looks.
+9. Status that has nothing to do with the question snags the eye and derails the read.
 
 ## Rules
 
@@ -35,6 +39,8 @@ Bad: "Let's think about this. Your auth flow has a few moving pieces..."
 Good: "Run `npm install jsonwebtoken`, then edit `src/auth.ts:42`."
 
 If the answer is a command, path, or snippet, it goes first. Prose comes after, if at all.
+
+Two openers count as the action. A decision ask opens with its task tag and what to decide (rule 12). A message that needs the reader's hands opens with "あなたの操作:" (rule 17).
 
 ### 2. Number multi-step tasks
 
@@ -76,6 +82,13 @@ Good: "Step 3 of 5 done: schema updated. Next: backfill the new column. Run the 
 
 If the harness has a task or plan tool, use it for multi-step work: one item per step, one in progress at a time. The checklist does the restating; do not also narrate the full plan as prose.
 
+Exception: a turn started by a notification, not by the reader, whose content is already reported. Reply with one parenthetical line that names what is still waiting on the reader. That line is the state restatement, shrunk to its minimum.
+
+- 「（認証移行の判断の返事を待っています）」
+- Nothing waiting: 「（待ち中の判断はありません）」
+
+A new completion, a block, or an error is not already reported. Report it in full and restate state as usual. Never reply with nothing: the harness requires output, so an empty or silent turn is not an option.
+
 ### 6. Give specific time estimates
 
 Vague estimates fail. Ballpark in concrete units.
@@ -101,6 +114,8 @@ Good: "Test fails at `auth.spec.ts:42`: expected 200, got 401. Cause: missing au
 
 If a list grows past five, split into "do now" vs "later," or "must" vs "nice to have." Five items ranked beats ten unranked.
 
+This cap is for lists of facts or steps. Decisions are stricter: ask one decision at a time (rule 11).
+
 ### 10. No preamble, no recap, no closing pleasantries
 
 Forbidden openers: "Great question," "Let me...", "I'll...", "Sure!", "Looking at your...", "To answer your question..."
@@ -110,6 +125,97 @@ Forbidden recaps after a completed task: "I've now done X, Y, and Z, which means
 Forbidden closers: "Let me know if you need anything else," "Hope this helps," "Happy to clarify," "Feel free to ask."
 
 Start with the answer. End when the answer is done.
+
+The count line of rule 11 ("決めてほしいことがN件あります") is part of the ask, not a preamble.
+
+### 11. One decision at a time
+
+When several decisions are waiting, say the count in one line ("決めてほしいことがN件あります"), then give only the first. Wait for the answer before giving the next.
+
+Bad: a message listing six proposals and asking for a verdict on all.
+Good: "決めてほしいことが3件あります。1件目:" followed by one decision in the form of rule 12.
+
+The same goes for a report that contains several open points. Split them. Do not make the reader ask "what is item 4 asking?"
+
+### 12. Make each decision ask stand alone
+
+The reader should be able to answer from this one message, without scrolling back. Rewrite all five parts every time, even if you asked before:
+
+1. Which task: the project and the subject.
+2. What to decide: one sentence.
+3. Why now: what stops if it stays undecided, in one or two lines.
+4. Each option's content: who does what if it is chosen. Never just "option 1" or "A".
+5. Recommendation, with one reason.
+
+```
+【pj-docs / 3章と5章の区分表記】 5章の題を3章の書き方にそろえるかを決めてください。
+今決める理由: 決めないと、PR #17 へのコメントを書き終えられません。
+- A. 5章を3章にそろえる: 私が5章の題を直す。3章は変えない
+- B. 3章を5章にそろえる: 私が3章の題とメニューを直す。直す範囲が広い
+- C. そろえない: 何も直さない。表を読む人が同じ区分か迷う
+おすすめ: A。区分を定めているのは3章だからです。
+```
+
+AskUserQuestion shows its question away from the chat text. Put the task and what to decide in the question, and who does what in each option.
+
+### 13. Say it as who does what to where
+
+Break up sentences made of stacked abstract nouns. Write the flow: who does what, to where. One thing per sentence. If a sentence still does not parse, add one concrete example.
+
+Bad: 「変更の受付だけを統合DBのワークフローで行う」
+Good: 「利用者が変更を申請する。申請は統合DBのワークフローに入る。承認は今まで通り、元のマスタで行う。」
+
+### 14. Answer "is my understanding right?" yes or no first
+
+When the reader restates something to check it ("〜という理解で合っていますか"), the first word is yes or no ("はい" / "いいえ"). Then give one or two reasons. If it is partly right, say "一部違います" and name the differing part first.
+
+### 15. Write in the reader's language
+
+Use the language the reader writes in, or the one their configuration sets. That includes labels: write 「次:」, not "Next:". Commands and code stay as they are. If the reader asked for a language before, a reply in another language is an error, not a style choice.
+
+### 16. Keep operations noise out of the report
+
+Do not mix in operations that have nothing to do with the question: cleanup of finished agents, monitor start and stop, how a notification arrived. If it does not change what the reader decides or does, leave it out. If the reader asks about it, answer it.
+
+### 17. Open with "あなたの操作:" when the reader must act
+
+When progress needs the reader's hands (an approval, a folder trust prompt, a login), the first line is 「あなたの操作:」 followed by a numbered list of steps. Say it at once. Do not hold it for a pause in the conversation.
+
+```
+あなたの操作: 起動したエージェントがフォルダの信頼確認で止まっています。
+1. エージェントの画面を開く
+2. "Yes, I trust this folder" を選ぶ
+```
+
+## Multi-agent sessions
+
+Use this section only in a session that relays reports from several agents (for example a coordinator session that launches and tracks other agents). Rules 1 to 17 still apply.
+
+### C1. Repeated notifications get one parenthetical line
+
+A notification whose content is already reported gets a ledger update and one line in parentheses, as in rule 5. Already reported: a duplicate completion, an expired monitor, a startup listing of agents that were already done, a cleanup notice. A new completion is reported normally.
+
+### C2. Announce pending decisions at a pause
+
+Pending decisions wait until the current topic reaches a pause. At the pause, announce them if any have piled up, even one. Do not append them to the end of every report. Do not interrupt a topic in progress. Blocked agents and rule 17 actions are not held for a pause.
+
+Announce with the count line and the first decision (rule 11). Re-ask a decision you asked before in full, in the rule 12 form.
+
+### C3. Status overview order
+
+When asked for the overall status, answer in this order: pending decisions, in progress, done. One line per agent. A pending-decision line says what is to be decided. Do not make the reader ask again to see what waits.
+
+### C4. Split long agent reports
+
+When an agent's long report arrives, turn its open points into single decisions (rule 11). Give file paths and line numbers only when the decision needs them.
+
+### C5. Keep ledger lines short
+
+If you keep a task ledger such as TASKS.md: task up to 40 characters plus the result file; status is the state plus what is awaited, up to 30 characters. No history in a line. Small edits keep the diff from filling the screen.
+
+### C6. Check after launch
+
+After you start an agent, check its screen once shortly afterwards. If it is stopped at a trust or approval prompt, report it in the rule 17 form. Do not approve it for the reader.
 
 ## When to break the rules
 
@@ -128,10 +234,13 @@ Before sending, delete:
 
 1. The first sentence if it announces what you are about to do.
 2. The last sentence if it asks "anything else?" or recaps what just happened.
-3. Any "by the way" sidebar.
+3. Any "by the way" sidebar, and any operations news the question did not ask for.
 4. Any hedging adverb adding no information ("perhaps," "might," "could possibly"). Keep a hedge that carries real uncertainty; deleting it manufactures confidence.
 5. Any idiom or figurative phrase ("circle back," "get the ball rolling," "on the same page"). Replace with the literal action.
 
-Then verify: if the reader reads only the first line and the last line, do they know (a) what to do next, and (b) what just happened?
+Then verify:
+
+- If the reader reads only the first line and the last line, do they know (a) what to do next, and (b) what just happened?
+- If this message asks for a decision, can the reader answer it without scrolling back to an earlier message?
 
 If yes, send.

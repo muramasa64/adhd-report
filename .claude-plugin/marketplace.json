@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.schemastore.org/claude-code-marketplace.json",
   "name": "adhd-report",
-  "description": "ADHD-friendly output and report shaping for Claude Code, based on i-have-adhd.",
+  "description": "ADHD-friendly output and report shaping for Claude Code.",
   "owner": {
     "name": "Isobe Kazuhiko"
   },
