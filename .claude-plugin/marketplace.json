@@ -1,0 +1,16 @@
+{
+  "$schema": "https://www.schemastore.org/claude-code-marketplace.json",
+  "name": "adhd-report",
+  "description": "ADHD-friendly output and report shaping for Claude Code, based on i-have-adhd.",
+  "owner": {
+    "name": "Isobe Kazuhiko"
+  },
+  "plugins": [
+    {
+      "name": "adhd-report",
+      "description": "Action-first output, one decision at a time, self-contained questions.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

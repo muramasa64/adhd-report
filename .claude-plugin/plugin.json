@@ -1,0 +1,15 @@
+{
+  "name": "adhd-report",
+  "version": "0.1.0",
+  "description": "Shape Claude Code output and reports for an ADHD reader: action first, one decision at a time, self-contained questions, short replies to repeated notifications.",
+  "author": {
+    "name": "Isobe Kazuhiko"
+  },
+  "contributors": [
+    {
+      "name": "Ayoub G.",
+      "url": "https://github.com/ayghri"
+    }
+  ],
+  "license": "MIT"
+}
