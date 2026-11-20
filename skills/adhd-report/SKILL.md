@@ -85,7 +85,7 @@ If the harness has a task or plan tool, use it for multi-step work: one item per
 Exception: a turn started by a notification, not by the reader, whose content is already reported. Reply with one parenthetical line that names what is still waiting on the reader. That line is the state restatement, shrunk to its minimum.
 
 - 「（認証移行の判断の返事を待っています）」
-- Nothing waiting: 「（待ち中の判断はありません）」
+- Nothing waiting: 「（返事を待っている事はありません）」
 
 A new completion, a block, or an error is not already reported. Report it in full and restate state as usual. Never reply with nothing: the harness requires output, so an empty or silent turn is not an option.
 

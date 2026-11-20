@@ -189,7 +189,7 @@ class ConflictResolutionTest(unittest.TestCase):
         body = section(r"5\. ").lower()
         for pattern in (r"notification", r"already reported", r"one parenthetical line", r"still waiting"):
             self.assertRegex(body, pattern)
-        self.assertIn("（待ち中の判断はありません）", section(r"5\. "))
+        self.assertIn("（返事を待っている事はありません）", section(r"5\. "))
 
     def test_rule_5_never_goes_fully_silent(self):
         self.assertRegex(section(r"5\. ").lower(), r"never (reply|respond) with nothing|not .*(empty|silent)")
